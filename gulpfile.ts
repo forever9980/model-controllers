@@ -1,4 +1,4 @@
-import {Gulpclass, SequenceTask, Task} from "gulpclass/Decorators";
+import {Gulpclass, SequenceTask, Task} from "gulpclass";
 
 const gulp = require("gulp");
 const del = require("del");
@@ -82,15 +82,6 @@ export class Gulpfile {
     }
 
     /**
-     * This task will copy typings.json file to the build package.
-     */
-    @Task()
-    copyTypingsFile() {
-        return gulp.src("./typings.json")
-            .pipe(gulp.dest("./build/package"));
-    }
-
-    /**
      * Creates a package that can be published to npm.
      */
     @SequenceTask()
@@ -98,7 +89,7 @@ export class Gulpfile {
         return [
             "clean",
             "compile",
-            ["packageFiles", "packagePreparePackageFile", "packageReadmeFile", "copyTypingsFile"]
+            ["packageFiles", "packagePreparePackageFile", "packageReadmeFile"]
         ];
     }
 

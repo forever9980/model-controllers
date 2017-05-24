@@ -1,5 +1,9 @@
 import {getMetadataArgsStorage} from "../index";
 
+/**
+ * Register remove action for the controller's model.
+ * Criteria can be used to perform conditional save.
+ */
 export function Remove() {
     return function(object: Object, propertyName: string) {
 

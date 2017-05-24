@@ -20,7 +20,11 @@ export * from "./decorator/GetManyAndCount";
 export * from "./decorator/GetOne";
 export * from "./decorator/Remove";
 export * from "./decorator/Save";
+export * from "./decorator/SaveAndRemove";
 export * from "./decorator/Upload";
+export * from "./decorator/Model";
+
+export * from "./RouteGenerator";
 
 /**
  * Gets metadata args storage.
@@ -218,8 +222,8 @@ export function registerControllers() {
             Body({ type: controllerModel.target })(action.object, action.method, criteriaModel ? 1 : 0);
 
         } else if (action.type === "save-and-remove") {
-            BodyParam("save"/*, { type: controllerModel.target }*/)(action.object, action.method, criteriaModel ? 1 : 0);
-            BodyParam("remove"/*, { type: controllerModel.target }*/)(action.object, action.method, criteriaModel ? 2 : 1);
+            BodyParam("save", { type: controllerModel.target })(action.object, action.method, criteriaModel ? 1 : 0);
+            BodyParam("remove", { type: controllerModel.target })(action.object, action.method, criteriaModel ? 2 : 1);
         }
 
         if (action.type === "remove" || action.type === "remove-by-id" || action.type === "remove-by-ids") {

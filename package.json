@@ -47,15 +47,18 @@
     "ts-node": "^2.1.2",
     "tslint": "^4.5.1",
     "tslint-stylish": "^2.1.0",
-    "typescript": "^2.3.2"
+    "typescript": "^2.3.2",
+    "class-transformer": "^0.1.6",
+    "routing-controllers": "^0.7.0-alpha.11",
+    "socket-controllers": "0.0.2"
   },
   "scripts": {
     "test": "gulp tests"
   },
-  "peerDependencies": {},
-  "dependencies": {
+  "peerDependencies": {
     "class-transformer": "^0.1.6",
-    "routing-controllers": "^0.7.0-alpha.7",
+    "routing-controllers": "^0.7.0-alpha.11",
     "socket-controllers": "0.0.2"
-  }
+  },
+  "dependencies": {}
 }
