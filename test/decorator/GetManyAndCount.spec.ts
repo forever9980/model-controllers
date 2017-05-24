@@ -1,10 +1,10 @@
 import "reflect-metadata";
-import {ModelController} from "../../src/decorator/ModelController";
-import {Model} from "../../src/decorator/Model";
+import {ModelController} from "../../src/server/decorator/ModelController";
+import {Model} from "../../src/server/decorator/Model";
 import {createExpressServer} from "routing-controllers";
-import {RouteGenerator} from "../../src/RouteGenerator";
-import {getMetadataArgsStorage, registerControllers} from "../../src/index";
-import {GetManyAndCount} from "../../src/decorator/GetManyAndCount";
+import {getMetadataArgsStorage, registerControllers} from "../../src/server/index";
+import {GetManyAndCount} from "../../src/server/decorator/GetManyAndCount";
+import {RouteGenerator} from "../../src/server/RouteGenerator";
 const chakram = require("chakram");
 const expect = chakram.expect;
 

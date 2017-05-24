@@ -3,6 +3,7 @@ import {Gulpclass, SequenceTask, Task} from "gulpclass";
 const gulp = require("gulp");
 const del = require("del");
 const shell = require("gulp-shell");
+const rename = require("gulp-rename");
 const replace = require("gulp-replace");
 const mocha = require("gulp-mocha");
 const chai = require("chai");
@@ -20,34 +21,43 @@ export class Gulpfile {
     // -------------------------------------------------------------------------
 
     /**
-     * Cleans build folder.
-     */
-    @Task()
-    clean(cb: Function) {
-        return del(["./build/**"], cb);
-    }
-
-    /**
      * Runs typescript files compilation.
      */
     @Task()
     compile() {
-        return gulp.src("package.json", { read: false })
+        return gulp.src("./gulpfile.ts", { read: false })
             .pipe(shell(["tsc"]));
     }
 
     // -------------------------------------------------------------------------
-    // Packaging and Publishing tasks
+    // Server library packaging tasks
     // -------------------------------------------------------------------------
 
     /**
-     * Publishes a package to npm from ./build/package directory.
+     * Cleans server build folder.
      */
     @Task()
-    npmPublish() {
-        return gulp.src("package.json", { read: false })
+    serverClean(cb: Function) {
+        return del(["./build/server-compiled/**", "./build/server-package/**"], cb);
+    }
+
+    /**
+     * Runs typescript files compilation for server package.
+     */
+    @Task()
+    serverCompile() {
+        return gulp.src("./gulpfile.ts", { read: false })
+            .pipe(shell(["cd ./src/server && tsc"]));
+    }
+
+    /**
+     * Publishes a server package.
+     */
+    @Task()
+    serverPublish() {
+        return gulp.src("gulpfile.ts", { read: false })
             .pipe(shell([
-                "cd ./build/package && npm publish"
+                "cd ./build/server-package && npm publish"
             ]));
     }
 
@@ -55,19 +65,20 @@ export class Gulpfile {
      * Copies all files that will be in a package.
      */
     @Task()
-    packageFiles() {
-        return gulp.src("./build/compiled/src/**/*")
-            .pipe(gulp.dest("./build/package"));
+    serverPackageFiles() {
+        return gulp.src(["./build/server-compiled/server/**/*", "./build/server-compiled/shared/**/*"])
+            .pipe(gulp.dest("./build/server-package"));
     }
 
     /**
      * Change the "private" state of the packaged package.json file to public.
      */
     @Task()
-    packagePreparePackageFile() {
-        return gulp.src("./package.json")
+    serverPackagePreparePackageFile() {
+        return gulp.src("./package.server.json")
             .pipe(replace("\"private\": true,", "\"private\": false,"))
-            .pipe(gulp.dest("./build/package"));
+            .pipe(rename("package.json"))
+            .pipe(gulp.dest("./build/server-package"));
     }
 
     /**
@@ -75,11 +86,102 @@ export class Gulpfile {
      * highlighting) and copy this README file into the package folder.
      */
     @Task()
-    packageReadmeFile() {
+    serverPackageReadmeFile() {
         return gulp.src("./README.md")
             .pipe(replace(/```typescript([\s\S]*?)```/g, "```javascript$1```"))
-            .pipe(gulp.dest("./build/package"));
+            .pipe(gulp.dest("./build/server-package"));
     }
+
+    /**
+     * Creates a package that can be published to npm.
+     */
+    @SequenceTask()
+    serverPackage() {
+        return [
+            "serverClean",
+            "serverCompile",
+            ["serverPackageFiles", "serverPackagePreparePackageFile", "serverPackageReadmeFile"]
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Client library packaging tasks
+    // -------------------------------------------------------------------------
+
+    /**
+     * Cleans client build folder.
+     */
+    @Task()
+    clientClean(cb: Function) {
+        return del(["./build/client-compiled/**", "./build/client-package/**"], cb);
+    }
+
+    /**
+     * Runs typescript files compilation.
+     */
+    @Task()
+    clientCompile() {
+        return gulp.src("./gulpfile.ts", { read: false })
+            .pipe(shell(["cd ./src/client && tsc"]));
+    }
+
+    /**
+     * Publishes a package to npm from ./build/package directory.
+     */
+    @Task()
+    clientPublish() {
+        return gulp.src("gulpfile.ts", { read: false })
+            .pipe(shell([
+                "cd ./build/client-package && npm publish"
+            ]));
+    }
+
+    /**
+     * Copies all files that will be in a package.
+     */
+    @Task()
+    clientPackageFiles() {
+        return gulp.src(["./build/client-compiled/client/**/*", "./build/client-compiled/shared/**/*"])
+            .pipe(gulp.dest("./build/client-package"));
+    }
+
+    /**
+     * Change the "private" state of the packaged package.json file to public.
+     */
+    @Task()
+    clientPackagePreparePackageFile() {
+        return gulp.src("./package.client.json")
+            .pipe(replace("\"private\": true,", "\"private\": false,"))
+            .pipe(rename("package.json"))
+            .pipe(gulp.dest("./build/client-package"));
+    }
+
+    /**
+     * This task will replace all typescript code blocks in the README (since npm does not support typescript syntax
+     * highlighting) and copy this README file into the package folder.
+     */
+    @Task()
+    clientPackageReadmeFile() {
+        return gulp.src("./README.md")
+            .pipe(replace(/```typescript([\s\S]*?)```/g, "```javascript$1```"))
+            .pipe(gulp.dest("./build/client-package"));
+    }
+
+    /**
+     * Creates a client package that can be published to npm.
+     */
+    @SequenceTask()
+    clientPackage() {
+        return [
+            "clientClean",
+            "clientCompile",
+            ["clientPackageFiles", "clientPackagePreparePackageFile", "clientPackageReadmeFile"]
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Packaging tasks
+    // -------------------------------------------------------------------------
 
     /**
      * Creates a package that can be published to npm.
@@ -87,18 +189,9 @@ export class Gulpfile {
     @SequenceTask()
     package() {
         return [
-            "clean",
-            "compile",
-            ["packageFiles", "packagePreparePackageFile", "packageReadmeFile"]
+            "serverPackage",
+            "clientPackage",
         ];
-    }
-
-    /**
-     * Creates a package and publishes it to npm.
-     */
-    @SequenceTask()
-    publish() {
-        return ["package", "npmPublish"];
     }
 
     // -------------------------------------------------------------------------

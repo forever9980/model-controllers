@@ -1,13 +1,12 @@
-import {getMetadataArgsStorage} from "./index";
-import {ModelMetadataArgs} from "./metadata/ModelMetadataArgs";
 
-export class RouteGenerator {
+export class AbstractRouteGenerator {
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    constructor(private prefix: string = "") {
+    constructor(protected prefix: string = "",
+                protected modelStorage: { target: Function, name: string }[]) {
     }
 
     // -------------------------------------------------------------------------
@@ -97,8 +96,8 @@ export class RouteGenerator {
     // Protected Methods
     // -------------------------------------------------------------------------
 
-    protected findModel(model: Function): ModelMetadataArgs { // todo: check if model === [Function]
-        const modelMetadata = getMetadataArgsStorage().models.find(modelMetadata => modelMetadata.target === model);
+    protected findModel(model: Function): { target: Function, name: string } { // todo: check if model === [Function]
+        const modelMetadata = this.modelStorage.find(modelMetadata => modelMetadata.target === model);
         if (!modelMetadata)
             throw new Error(`Model was not found registered for the ${model}. Did you forget to put @Model decorator on your model?`);
 
@@ -106,7 +105,7 @@ export class RouteGenerator {
     }
 
     protected hasModel(model: Function): boolean {
-        return !!getMetadataArgsStorage().models.find(modelMetadata => modelMetadata.target === model);
+        return !!this.modelStorage.find(modelMetadata => modelMetadata.target === model);
     }
 
 }
